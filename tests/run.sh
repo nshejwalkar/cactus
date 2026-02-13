@@ -14,6 +14,7 @@ TRANSCRIBE_MODEL_NAME="$DEFAULT_TRANSCRIBE_MODEL"
 ANDROID_MODE=false
 IOS_MODE=false
 NO_REBUILD=false
+ONLY_EXEC=""
 
 while [[ $# -gt 0 ]]; do
     case $1 in
@@ -37,6 +38,10 @@ while [[ $# -gt 0 ]]; do
             NO_REBUILD=true
             shift
             ;;
+        --only)
+            ONLY_EXEC="$2"
+            shift 2
+            ;;
         --precision)
             PRECISION="$2"
             shift 2
@@ -51,6 +56,7 @@ while [[ $# -gt 0 ]]; do
             echo "  --android                 Run tests on Android device or emulator"
             echo "  --ios                     Run tests on iOS device or simulator"
             echo "  --no-rebuild              Skip building cactus library and tests"
+            echo "  --only <test_name>        Only run the specified test (engine, graph, index, kernel, kv_cache, performance)"
             echo "  --help, -h                Show this help message"
             exit 0
             ;;
@@ -156,6 +162,31 @@ if [ ${#executable_tests[@]} -eq 0 ]; then
 fi
 
 test_executables=("${executable_tests[@]}")
+
+# If --only is set, execute only the named test
+if [ -n "$ONLY_EXEC" ]; then
+    allowed=("engine" "graph" "index" "kernel" "kv_cache" "performance")
+    ok=false
+    for a in "${allowed[@]}"; do
+        if [ "$a" = "$ONLY_EXEC" ]; then
+            ok=true
+            break
+        fi
+    done
+    if [ "$ok" = false ]; then
+        echo "Unknown test name: $ONLY_EXEC"
+        echo "Allowed: ${allowed[*]}"
+        exit 1
+    fi
+
+    target="./test_$ONLY_EXEC"
+    if [ ! -f "$target" ] || [ ! -x "$target" ]; then
+        echo "Could not find or execute test: $target"
+        exit 1
+    fi
+
+    test_executables=("$target")
+fi
 
 echo "Found ${#test_executables[@]} test executable(s)"
 

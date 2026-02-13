@@ -155,7 +155,7 @@ git clone https://github.com/cactus-compute/cactus && cd cactus && source ./setu
 | `cactus download [model]` | Downloads model to `./weights` |
 | `cactus convert [model] [dir]` | Converts model, supports LoRA merging (`--lora <path>`) |
 | `cactus build` | Builds for ARM (`--apple` or `--android`) |
-| `cactus test` | Runs tests (`--ios` / `--android`, `--model [name/path]`, `--transcribe_model [name/path]`), `--precision` |
+| `cactus test` | Runs tests (`--ios` / `--android`, `--model [name/path]`, `--transcribe_model [name/path]`, `--only [test_name]`, `--precision`) |
 | `cactus transcribe [model]` | Transcribe audio file (`--file`) or live microphone |
 | `cactus clean` | Removes build artifacts |
 | `cactus --help` | Shows all commands and flags (always run this) |
