@@ -63,7 +63,7 @@ def generate_app_delegate(output_path, test_files)
         setbuf(stderr, NULL);
     #endif
 
-        cactus::Logger::instance().set_level(cactus::LogLevel::DEBUG);
+        cactus::Logger::instance().set_level(cactus::LogLevel::ERROR);
 
         NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
         [self copyFromBundle:bundlePath toDocuments:getenv("CACTUS_TEST_MODEL")];

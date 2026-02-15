@@ -3,6 +3,7 @@
 
 #import "AppDelegate.h"
 #import <unistd.h>
+#include "graph/graph.h"
 
 extern int test_engine_main();
 extern int test_graph_main();
@@ -18,10 +19,27 @@ extern int test_performance_main();
     NSFileManager *fileManager = [NSFileManager defaultManager];
     NSString *itemName = [NSString stringWithUTF8String:name];
     NSString *sourceItemPath = [NSString stringWithFormat:@"%@/%@", bundlePath, itemName];
-    if ([fileManager fileExistsAtPath:itemName]) {
-        [fileManager removeItemAtPath:itemName error:nil];
+    if (![fileManager fileExistsAtPath:sourceItemPath]) {
+        fprintf(stderr, "[CactusTest] copyFromBundle: source not found: %s\n", [sourceItemPath UTF8String]);
+        return;
     }
-    [fileManager copyItemAtPath:sourceItemPath toPath:itemName error:nil];
+    if ([fileManager fileExistsAtPath:itemName]) {
+        NSError *removeError = nil;
+        [fileManager removeItemAtPath:itemName error:&removeError];
+        if (removeError) {
+            fprintf(stderr, "[CactusTest] copyFromBundle: failed to remove existing %s: %s\n",
+                [itemName UTF8String], [[removeError localizedDescription] UTF8String]);
+        }
+    }
+    NSError *copyError = nil;
+    [fileManager copyItemAtPath:sourceItemPath toPath:itemName error:&copyError];
+    if (copyError) {
+        fprintf(stderr, "[CactusTest] copyFromBundle: failed to copy %s -> %s: %s\n",
+            [sourceItemPath UTF8String], [itemName UTF8String], [[copyError localizedDescription] UTF8String]);
+    } else {
+        fprintf(stderr, "[CactusTest] copyFromBundle: copied %s -> %s\n",
+            [sourceItemPath UTF8String], [itemName UTF8String]);
+    }
 }
 
 - (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
@@ -35,6 +53,8 @@ extern int test_performance_main();
     setbuf(stdout, NULL);
     setbuf(stderr, NULL);
 #endif
+
+    cactus::Logger::instance().set_level(cactus::LogLevel::DEBUG);
 
     NSString *bundlePath = [[NSBundle mainBundle] bundlePath];
     [self copyFromBundle:bundlePath toDocuments:getenv("CACTUS_TEST_MODEL")];
