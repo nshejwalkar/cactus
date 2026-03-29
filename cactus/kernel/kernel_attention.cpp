@@ -1036,7 +1036,7 @@ void cactus_layer_norm_f16(
     float eps
 ) {
     constexpr size_t SIMD_WIDTH = 8;
-    constexpr size_t UNROLL_FACTOR = 2;
+    constexpr size_t UNROLL_FACTOR = 3;
     constexpr size_t TILE_SIZE = SIMD_WIDTH * UNROLL_FACTOR;
 
     const size_t tile_end = (dims >= TILE_SIZE) ? dims - TILE_SIZE + 1 : 0;
